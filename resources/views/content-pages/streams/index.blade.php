@@ -50,8 +50,8 @@
                                             <div class="row">
                                                 <div class="col student-div">
                                                     <label class="col-form-label">Student ID</label>
-                                                    <input class="form-control rounded student_id" type="text"
-                                                        name="student_id" id="student_id" value="">
+                                                    <input class="form-control rounded student_id error error-student_id"
+                                                        type="text" name="student_id" id="student_id" value="">
                                                 </div>
                                             </div>
 
@@ -110,12 +110,25 @@
                         if (response.success) {
                             $('#stream_data').html(response.html);
                         }
+                    },
+                    error: function(xhr, status, error) {
+
                     }
+                    // error: function(res) {
+                    // res.jsonerrors.errors
+                    // key val
+                    // key => student_id
+                    // val => "student id is required"
+
+                    // $(`.error_${key}`).html(value);
+
+
                 });
             }
 
             // Add modal open
             $('#addStreamBtn').on('click', function() {
+                $('.error').html('');
                 $('#streamForm').trigger('reset');
                 $('#stream').val('');
                 clearValidationErrors();
@@ -150,8 +163,11 @@
                             fetchStreams();
                         }
                     },
-                    error: function(error) {
-                        // console.log("Error " + error.message);
+                    error: function(xhr, status, errors) {
+                        clearValidationErrors();
+                        showValidationErrors(xhr);
+                        // console.log(xhr.responseJSON.errors);
+
                     }
                 });
             });
@@ -160,16 +176,18 @@
                 $('span,br').remove();
             }
 
-            function showValidationErrors(data) {
-                if (data.errors.student_id) {
-                    $('.student-div').append('<span class="text-danger">' + data.errors.student_id + '</span><br>');
-                }
-                if (data.errors.stream_type) {
-                    $('.stream-div').append('<br><span class="text-danger">' + data.errors.stream_type +
+            function showValidationErrors(xhr) {
+                if (xhr.responseJSON.errors.student_id) {
+                    $('.student-div').append('<span class="text-danger">' + xhr.responseJSON.errors.student_id +
                         '</span><br>');
                 }
-                if (data.errors.is_active) {
-                    $('.is_active-div').append('<br><span class="text-danger">' + data.errors.is_active +
+                if (xhr.responseJSON.errors.stream_type) {
+                    $('.stream-div').append('<br><span class="text-danger">' + xhr.responseJSON.errors.stream_type +
+                        '</span><br>');
+                }
+                if (xhr.responseJSON.errors.is_active) {
+                    $('.is_active-div').append('<br><span class="text-danger">' + xhr.responseJSON.errors
+                        .is_active +
                         '</span><br>');
                 }
             }
@@ -206,6 +224,12 @@
                 $('#stream').val('');
                 clearValidationErrors();
             });
+
+            $('#streamModal').on('hidden.bs.modal', function(e) {
+                $('#streamForm').trigger("reset");
+                $('#stream').val('');
+                clearValidationErrors();
+            })
 
 
             $(document).on('click', '.delete-btn', function() {

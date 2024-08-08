@@ -143,13 +143,18 @@
                             console.log(data.errors.documents);
 
                             clearValidationErrors();
-                            validation(data);
+                            validation(xhr);
                         } else {
                             $('#studentModal').modal('hide');
                             fetchstudent();
                         }
                     },
-                    error: function(status, data) {}
+                    error: function(xhr, status, errors) {
+                        clearValidationErrors();
+                        validation(xhr);
+                        console.log(xhr.responseJSON.errors.documents);
+
+                    }
                 });
             });
 
@@ -157,23 +162,27 @@
                 $('span,br').remove();
             }
 
-            function validation(data) {
+            function validation(xhr) {
                 clearValidationErrors();
 
-                if (data.errors.name) {
-                    $('.name').append('<span class="text-danger">' + data.errors.name + '</span><br>');
+                if (xhr.responseJSON.errors.name) {
+                    $('.name').append('<span class="text-danger">' + xhr.responseJSON.errors.name + '</span><br>');
                 }
-                if (data.errors.image) {
-                    $('.imagedata').append('<span class="text-danger">' + data.errors.image + '</span><br>');
+                if (xhr.responseJSON.errors.image) {
+                    $('.imagedata').append('<span class="text-danger">' + xhr.responseJSON.errors.image +
+                        '</span><br>');
                 }
-                if (data.errors.address) {
-                    $('.address').append('<span class="text-danger">' + data.errors.address + '</span><br>');
+                if (xhr.responseJSON.errors.address) {
+                    $('.address').append('<span class="text-danger">' + xhr.responseJSON.errors.address +
+                        '</span><br>');
                 }
-                if (data.errors.contact) {
-                    $('.contact').append('<span class="text-danger">' + data.errors.contact + '</span><br>');
+                if (xhr.responseJSON.errors.contact) {
+                    $('.contact').append('<span class="text-danger">' + xhr.responseJSON.errors.contact +
+                        '</span><br>');
                 }
-                if (data.errors.documents) {
-                    $('.documents').append('<span class="text-danger">' + data.errors.documents + '</span><br>');
+                if (xhr.responseJSON.errors.documents) {
+                    $('.documents').append('<span class="text-danger">' + xhr.responseJSON.errors.documents +
+                        '</span><br>');
                 }
             }
 

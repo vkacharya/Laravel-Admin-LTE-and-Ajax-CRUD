@@ -9,7 +9,7 @@
         <td>{{ $row->contact }}</td>
         <td> {{ $row->documents }}</td>
         <td>
-            @foreach (json_decode($row->documents) as $document)
+            @foreach ((array) $row->documents as $document)
                 <a href="{{ asset('storage/documents/' . $document) }}" target="_blank"
                     class="btn btn-info btn-sm">View</a>
             @endforeach

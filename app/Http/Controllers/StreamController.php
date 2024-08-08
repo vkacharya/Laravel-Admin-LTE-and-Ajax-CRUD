@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StreamRequest;
+use Exception;
 use App\Models\stream;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
+use App\Http\Requests\StreamStoreRequest;
+use App\Http\Requests\StreamUpdateRequest;
 use Illuminate\Support\Facades\Validator;
 
 class StreamController extends Controller
@@ -40,21 +42,54 @@ class StreamController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StreamStoreRequest $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            "student_id" => 'required',
-            "stream_type" => 'required',
-            "is_active" => 'required',
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     "student_id" => 'required',
+        //     "stream_type" => 'required',
+        //     "is_active" => 'required',
+        // ]);
+        // $validator = $request->validated();
+        // Stream::create($validator);
+        // return response()->json(['status' => 200, 'message' => 'Stream created successfully']);
+        // dump($validator);
+        // ["student_id" => 'required',
+        //     "stream_type" => 'required',
+        //     "is_active" => 'required'
+        //     'image' => {}
+        // ]
+
+        // $validator['image'] = public disk
+        // ["student_id" => 'required',
+        //     "stream_type" => 'required',
+        //     "is_active" => 'required'
+        //     'image' => 'folder/image/ghihbvgvbhjnm.png'
+        // ]
+        // // dd();
+
 
         // $id = $request->id;
-        if ($validator->fails()) {
-            return response()->json(['status' => 400, 'errors' => $validator->messages()]);
-        } else {
-            Stream::create($request->all());
+        // if ($validator->fails()) {
+        //     return response()->json(['status' => 400, 'errors' => $validator->messages()]);
+        // } else {
+
+        // }
+
+        try {
+            $validator = $request->validated();
+
+            Stream::create($validator);
+
             return response()->json(['status' => 200, 'message' => 'Stream created successfully']);
+        } catch (Exception $e) {
+
+            return response()->json([
+
+                'status' => 400,
+                'message' => 'Validation Error',
+                'errors' => $e->getMessage()
+            ]);
         }
 
     }
@@ -89,24 +124,42 @@ class StreamController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Stream $stream)
+    public function update(StreamUpdateRequest $request, Stream $stream)
     {
         // dd("check request");
 
-        $validator = Validator::make($request->all(), [
-            "student_id" => 'required',
-            "stream_type" => 'required',
-            "is_active" => 'required',
-        ]);
-        $id = $request->id;
-        if ($validator->fails()) {
-            return response()->json(['status' => 400, 'errors' => $validator->messages()]);
-        } else if ($id) {
 
-            $stream->update($request->all());
+        // $id = $request->id;
+        // if ($validator->fails()) {
+        //     return response()->json(['status' => 400, 'errors' => $validator->messages()]);
+        // } else if ($id) {
+
+        //     $stream->update($request->all());
+        //     return response()->json([
+        //         'status' => 200,
+        //         'message' => 'Stream updated successfully',
+        //     ]);
+        // }
+
+        $id = $request->id;
+        try {
+            if ($id) {
+
+                $stream->update($request->all());
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Stream updated successfully',
+                ]);
+            }
+
+            return response()->json(['status' => 200, 'message' => 'Stream created successfully']);
+        } catch (Exception $e) {
+
             return response()->json([
-                'status' => 200,
-                'message' => 'Stream updated successfully',
+
+                'status' => 400,
+                'message' => 'Validation Error',
+                'errors' => $e->getMessage()
             ]);
         }
 
@@ -124,3 +177,8 @@ class StreamController extends Controller
             ->with('status', 'Stream deleted successfully');
     }
 }
+
+
+//
+
+
