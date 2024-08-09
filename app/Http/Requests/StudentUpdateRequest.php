@@ -26,8 +26,7 @@ class StudentUpdateRequest extends FormRequest
             "image" => 'image|mimes:png,jpg,jpeg',
             "address" => 'required',
             "contact" => 'required',
-            "documents" => 'nullable',
-            "documents.*" => 'mimes:pdf',
+            "documents.*" => 'nullable|mimes:pdf',
         ];
     }
 

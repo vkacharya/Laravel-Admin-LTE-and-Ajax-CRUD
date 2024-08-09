@@ -58,9 +58,8 @@
                                             <div class="form-group imagedata">
                                                 <label for="image">Image</label>
                                                 <input type="file" class="form-control-file" id="image"
-                                                    name="image">
-                                                <img id="currentImage" src="" alt="Current Image"
-                                                    style="max-width: 100px;">
+                                                    name="image" accept="image/png, image/jpeg">
+                                                <img id="currentImage" alt="Current Image" style="max-width: 100px;">
                                             </div>
                                             <div class="form-group address">
                                                 <label for="address">Address</label>
@@ -75,8 +74,8 @@
                                                 <input type="file" class="form-control-file" id="documents"
                                                     name="documents[]" accept="application/pdf" multiple>
                                                 <div id="currentDocuments">
-                                                    <a href="{{ asset('storage/documents/') }}" target="_blank"
-                                                        class="btn btn-info btn-sm">View</a>
+                                                    {{-- <a href="{{ asset('storage/documents/') }}" target="_blank"
+                                                        class="btn btn-info btn-sm">View</a> --}}
                                                 </div>
                                             </div>
                                             <button type="submit" class="btn btn-primary mt-3">Save</button>
@@ -152,7 +151,7 @@
                     error: function(xhr, status, errors) {
                         clearValidationErrors();
                         validation(xhr);
-                        console.log(xhr.responseJSON.errors.documents);
+                        console.log(xhr);
 
                     }
                 });
@@ -204,16 +203,26 @@
                             $('#name').val(response.student.name);
                             var img = response.student.image;
                             $('#currentImage').attr("src",
-                                `{{ asset('storage/images/${img}') }}`);
+                                `{{ url('storage') }}/${img}`);
                             $('#address').val(response.student.address);
                             $('#contact').val(response.student.contact);
-                            $('#currentDocuments').prepend(response.student.documents);
+                            // $('#currentDocuments').prepend(response.student.documents);
                             $('.id-class').val(response.student.id);
-                            var doc = response.student.documents;
-                            doc = doc.replace(/"|'/g, '', /[]/g);
-                            doc = doc.replace(/^\[(.+)\]$/, '$1');
-                            $('#currentDocuments a').attr('href',
-                                `{{ asset('storage/documents/${doc}') }}`);
+                            var doc = response.docs;
+                            // doc = doc.replace(/"|'/g, '', /[]/g);
+                            // doc = doc.replace(/^\[(.+)\]$/, '$1');
+                            console.log(doc);
+
+                            // $('#currentDocuments a').attr('href',
+                            //     `{{ url('storage') }}/${doc}`);
+
+                            // documents.forEach(function(doc) {
+                            $('#currentDocuments').append(`
+                             <ul>
+                            <li>${doc}</li>
+                            </ul>`);
+                            // <a href="{{ url('storage') }}/${doc}" target="_blank" class="btn btn-info btn-sm">View</a>
+
                         }
                     }
                 });
@@ -224,12 +233,14 @@
                 $('.id-class').val('');
                 $('._method').val('POST');
                 $('#currentImage').hide();
+                $('#currentDocuments').val('');
                 clearValidationErrors();
             });
 
             $(document).on('click', '#addStudentBtn', function(e) {
                 $('#currentImage').hide();
                 $('#currentDocuments').hide();
+                $('#currentDocuments').val('');
                 $('.id-class').val('');
                 $('._method').val('POST');
                 $('#studentForm')[0].reset();

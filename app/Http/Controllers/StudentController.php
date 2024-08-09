@@ -67,18 +67,21 @@ class StudentController extends Controller
 
         try {
             $validator = $request->validated();
-            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
-            $request->file('image')->storeAs('images', $imageName, ['disk' => 'public']);
-            $validator['image'] = $imageName;
-
+            //dump()
+            // $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
+            // $validator['image'] = $imageName;
+            // dd($validator)
+            // $documentNames = [];
+            $validator['image'] = $validator['image']->store('images', ['disk' => 'public']);
             $documentNames = [];
-            foreach ($request->file('documents') as $document) {
-                $documentName = time() . '_' . $document->getClientOriginalName();
-                $document->storeAs('documents', $documentName, ['disk' => 'public']);
-                $documentNames[] = $documentName;
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $document) {
+                    $documentNames[] = $document->store('documents', ['disk' => 'public']);
+                }
+                $validator['documents'] = serialize($documentNames);
             }
-            $validator['documents'] = $documentName;
 
+            // dd($validator);
 
             Student::create($validator);
 
@@ -162,6 +165,7 @@ class StudentController extends Controller
             return response()->json([
                 'status' => 200,
                 'student' => $student,
+                'docs' => unserialize($student->documents)
             ]);
         } else {
             return response()->json([
@@ -180,35 +184,37 @@ class StudentController extends Controller
         // dd("11", $request->id);
 
         try {
-
+            $student = Student::find($id);
             $validator = $request->validated();
             // dump($student);
-            $imageName = $request->image;
+            $imageName = $student->image;
             if ($request->hasFile('image')) {
-                if (Storage::exists('public/images/' . $imageName)) {
-                    Storage::delete('public/images/' . $imageName);
+                if (Storage::exists('public' . '/' . $imageName)) {
+                    Storage::delete('public' . '/' . $imageName);
                 }
-                $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
-                $request->file('image')->storeAs('images', $imageName, ['disk' => 'public']);
-                $validator['image'] = $imageName;
+                $validator['image'] = $validator['image']->store('images', ['disk' => 'public']);
             }
+            // dd($validator);
 
+            $documentNames = [];
+            // dd($request->hasFile('documents'));
 
-            $documentNames = $request->documents;
+            // dd($documentNames = unserialize($student->documents));
             if ($request->hasFile('documents')) {
-                foreach ($documentNames as $documentName) {
-                    if (Storage::exists('public/documents/' . $documentName)) {
-                        Storage::delete('public/documents/' . $documentName);
+                foreach (unserialize($student->documents) as $documentName) {
+                    if (Storage::exists('public' . '/' . $documentName)) {
+                        Storage::delete('public' . '/' . $documentName);
                     }
                 }
-                $documentNames = [];
+
                 foreach ($request->file('documents') as $document) {
-                    $documentName = time() . '_' . $document->getClientOriginalName();
-                    $document->storeAs('documents', $documentName, ['disk' => 'public']);
-                    $documentNames[] = $documentName;
+                    $documentNames[] = $document->store('documents', ['disk' => 'public']);
                 }
-                $validator['documents'] = $documentName;
+                $validator['documents'] = serialize($documentNames);
+
             }
+
+
             // dd($validator);
             $validator = Student::find($id)->update($validator);
         } catch (Exception $e) {
@@ -226,14 +232,18 @@ class StudentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Student $request, $id)
     {
         $student = Student::find($id);
+        // dd($student['documents']);
         Storage::delete('public' . '/' . $student->image);
-        if (fileExists($student->documents))
-            foreach (json_decode($student->documents, true) as $documentName) {
+        if (fileExists($student->documents)) {
+            foreach (unserialize($student->documents) as $documentName) {
+
                 Storage::delete('public' . '/' . $documentName);
+
             }
+        }
 
         if ($student) {
             $student->delete();
@@ -249,6 +259,7 @@ class StudentController extends Controller
         }
     }
 }
+
 
 
 
